@@ -10,7 +10,7 @@ import (
 type IngredientRepository interface {
 	FindAll() ([]domain.Ingredient, error)
 	FindById(id string) (*domain.Ingredient, error)
-	Create(req domain.Ingredient) error
+	Create(req *domain.Ingredient) error
 	Update(req *domain.Ingredient) error
 	Delete(id string, deletedBy string) error
 	FindDataWithPagination(req domain.PaginationRequest) ([]domain.Ingredient, int64, error)
@@ -62,7 +62,7 @@ func (r *ingredientRepository) FindById(id string) (*domain.Ingredient, error) {
 	return &ingredient, nil
 }
 
-func (r *ingredientRepository) Create(req domain.Ingredient) error {
+func (r *ingredientRepository) Create(req *domain.Ingredient) error {
 	return r.db.Create(req).Error
 }
 

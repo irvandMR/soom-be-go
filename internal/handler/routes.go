@@ -55,6 +55,9 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 			ing.POST("", ingredientHandle.CreateIngredient)
 			ing.POST("/update", ingredientHandle.UpdateIngredient)
 			ing.DELETE(":id", ingredientHandle.DeleteIngredient)
+
+			ing.POST("/stock-in", ingredientHandle.StockIn)
+			ing.GET("/history/:id", ingredientHandle.GetHistory)
 		}
 	}
 

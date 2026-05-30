@@ -54,6 +54,11 @@ air
 go run ./cmd/api
 ```
 
+**Generate file migration**
+```bash
+goose -dir db/migrations create <script_name> sql
+```
+
 Aplikasi berjalan di `http://localhost:8080`
 
 > Migrasi database berjalan **otomatis** saat aplikasi pertama kali distart.

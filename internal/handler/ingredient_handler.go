@@ -15,8 +15,11 @@ type IngredientHandler struct {
 }
 
 func NewIngredientHandler(db *gorm.DB) *IngredientHandler {
-	repo := repository.NewIngredientRepository(db)
-	uc := usecase.NewIngredientUsecase(repo)
+	repoIngredient := repository.NewIngredientRepository(db)
+	repoCategory := repository.NewCategoriesRepository(db)
+	repoUom := repository.NewUomRepository(db)
+	repoIngredientStock := repository.NewIngredientStockRepository(db)
+	uc := usecase.NewIngredientUsecase(repoIngredient, repoCategory, repoUom, repoIngredientStock)
 	return &IngredientHandler{usecase: uc}
 }
 
@@ -85,4 +88,29 @@ func (h *IngredientHandler) DeleteIngredient(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, SuccessResponse("Success delete categories", nil))
+}
+
+func (h *IngredientHandler) StockIn(c *gin.Context) {
+	var req domain.StockInRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("Invalid request", handleValidationError(err)))
+		return
+	}
+	req.Username = c.GetString("username")
+	data, err := h.usecase.StockIn(req)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse("Success add stock", data))
+
+}
+
+func (h *IngredientHandler) GetHistory(c *gin.Context) {
+	id := c.Param("id")
+	data, err := h.usecase.GetHistory(id)
+	if err != nil {
+		c.Error(err)
+	}
+	c.JSON(http.StatusOK, SuccessResponse("Success get ingredients history", data))
 }
