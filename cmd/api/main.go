@@ -6,6 +6,7 @@ import (
 	"soom-be-go/internal/handler"
 	"soom-be-go/internal/middleware"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +21,14 @@ func main() {
 	port := os.Getenv("APP_PORT")
 
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+        AllowOrigins:     []string{"http://localhost:5174"},
+        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+        ExposeHeaders:    []string{"Content-Length"},
+        AllowCredentials: true,
+    }))
 
 	r.Use(middleware.Errorhandler())
 
