@@ -20,6 +20,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 			auth.POST("/login", authHandler.Login)
 			auth.POST("/refresh", authHandler.RefreshToken)
 			auth.POST("/logout", authHandler.Logout)
+			auth.GET("/me", middleware.JwtAuth(), authHandler.me)
 		}
 		// UOM routes
 		uomHandler := NewUomHandler(db)
@@ -43,6 +44,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 			ctg.POST("", categoriesHandler.CreateCategories)
 			ctg.POST("/update", categoriesHandler.UpdateCategories)
 			ctg.DELETE(":id", categoriesHandler.DeleteCategories)
+			ctg.GET("/types", categoriesHandler.GetCategoriesType)
 		}
 
 		// Ingredient

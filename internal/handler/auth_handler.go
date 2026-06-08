@@ -73,3 +73,8 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, SuccessResponse("Logout success", nil))
 }
+
+func (h *AuthHandler) me(c *gin.Context) {
+	user := c.MustGet("username").(string)
+	c.JSON(http.StatusOK, SuccessResponse("User info", user))
+}

@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -58,7 +57,6 @@ func JwtAuth() gin.HandlerFunc {
 
 		// simpan claims ke context — bisa diakses di handler
 		claims, _ := token.Claims.(jwt.MapClaims)
-		fmt.Println("claims", claims)
 		c.Set("userId", claims["id"])
 		c.Set("username", claims["username"])
 		c.Set("role", claims["role"])

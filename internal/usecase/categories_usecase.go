@@ -18,10 +18,10 @@ func NewCategoriesUsecase(r repository.CategoriesRepository) *CategoriesUsecase 
 	return &CategoriesUsecase{repo: r}
 }
 
-func (u *CategoriesUsecase) GetAllCategories(req domain.PaginationRequest) (*domain.PaginationResponse, error) {
+func (u *CategoriesUsecase) GetAllCategories(req domain.CategoriesQueryRequest) (*domain.PaginationResponse, error) {
 	req.Normalize()
 
-	categories, total, err := u.repo.FindDataWithPagination(req)
+	categories, total, err := u.repo.FindAll(req)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +42,17 @@ func (u *CategoriesUsecase) GetAllCategories(req domain.PaginationRequest) (*dom
 
 func (u *CategoriesUsecase) GetCategoriesById(id string) (*domain.Categories, error) {
 	categories, err := u.repo.FindById(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, middleware.ErrNotFound
+		}
+		return nil, err
+	}
+	return categories, nil
+}
+
+func (u *CategoriesUsecase) GetCategoriesByType(tenantId *string) ([]domain.Categories, error) {
+	categories, err := u.repo.FindTypeByTenant(tenantId)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, middleware.ErrNotFound

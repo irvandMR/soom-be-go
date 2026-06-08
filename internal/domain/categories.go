@@ -6,7 +6,7 @@ type Categories struct {
 	Code     string  `gorm:"size:100;not null;unique"`
 	Name     string  `gorm:"size:100;not null"`
 	Type     string  `gorm:"size:50;not null"`
-	IsActive bool    `gorm:"default:true;not null"`
+	IsActive bool    `gorm:"default:false;not null"`
 }
 
 type CategoriesRequest struct {
@@ -29,4 +29,10 @@ type CategoriesResponse struct {
 	Name     string `json:"name"`
 	IsActive bool   `json:"is_active"`
 	Type     string `json:"type"`
+}
+
+type CategoriesQueryRequest struct {
+	PaginationRequest
+	Search string `form:"search"`
+	Type   string `from:"type"`
 }

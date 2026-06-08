@@ -8,29 +8,50 @@ import (
 )
 
 type CategoriesRepository interface {
-	FindAll() ([]domain.Categories, error)
-	FindDataWithPagination(req domain.PaginationRequest) ([]domain.Categories, int64, error)
+	FindAll(req domain.CategoriesQueryRequest) ([]domain.Categories, int64, error)
 	Create(req *domain.Categories) error
 	Update(req *domain.Categories) error
 	Delete(id string, deletedBy string) error
 	FindById(id string) (*domain.Categories, error)
+	FindTypeByTenant(tenantId *string) ([]domain.Categories, error)
 }
 
 type categoriesRepository struct {
 	db *gorm.DB
 }
 
-func (r *categoriesRepository) FindAll() ([]domain.Categories, error) {
+// FindTypeByTenant implements [CategoriesRepository].
+func (r *categoriesRepository) FindTypeByTenant(tenantId *string) ([]domain.Categories, error) {
 	var categories []domain.Categories
-	result := r.db.Where("deleted_at is null").Find(&categories)
-	return categories, result.Error
+
+	query := r.db.Model(&domain.Categories{})
+
+	if tenantId != nil {
+		query = query.Where("tenant_id = ?", *tenantId)
+	}
+
+	err := query.Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }
 
-func (r *categoriesRepository) FindDataWithPagination(req domain.PaginationRequest) ([]domain.Categories, int64, error) {
+// FindAll implements [CategoriesRepository].
+func (r *categoriesRepository) FindAll(req domain.CategoriesQueryRequest) ([]domain.Categories, int64, error) {
 	var categories []domain.Categories
 	var total int64
 
 	query := r.db.Model(&domain.Categories{}).Where("deleted_at is null")
+
+	if req.Search != "" {
+		query = query.Where("name ILIKE ?", "%"+req.Search+"%")
+	}
+
+	if req.Type != "" {
+		query = query.Where("type = ?", req.Type)
+	}
 
 	query.Count(&total)
 

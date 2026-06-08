@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"soom-be-go/internal/domain"
 	"soom-be-go/internal/repository"
@@ -22,7 +21,7 @@ func NewCategoriesHandler(db *gorm.DB) *CategoriesHandler {
 }
 
 func (h *CategoriesHandler) GetAll(c *gin.Context) {
-	var req domain.PaginationRequest
+	var req domain.CategoriesQueryRequest
 	data, err := h.usecase.GetAllCategories(req)
 	if err != nil {
 		c.Error(err)
@@ -39,6 +38,23 @@ func (h *CategoriesHandler) GetCategoriesById(c *gin.Context) {
 	c.JSON(http.StatusOK, SuccessResponse("Success get categories", data))
 }
 
+func (h *CategoriesHandler) GetCategoriesType(c *gin.Context) {
+	tenantIdStr := c.GetString("tenantId")
+
+	var tenantId *string
+	if tenantIdStr != "" {
+		tenantId = &tenantIdStr
+	}
+
+	data, err := h.usecase.GetCategoriesByType(tenantId)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, SuccessResponse("Success get categorie types", data))
+}
+
 func (h *CategoriesHandler) CreateCategories(c *gin.Context) {
 	var req domain.CategoriesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -50,7 +66,6 @@ func (h *CategoriesHandler) CreateCategories(c *gin.Context) {
 	if tenantId != "" {
 		req.TenantId = &tenantId
 	}
-	fmt.Println("masuk controller")
 	data, err := h.usecase.CreateCategories(req)
 	if err != nil {
 		c.Error(err)
