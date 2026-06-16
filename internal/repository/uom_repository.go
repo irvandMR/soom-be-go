@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"soom-be-go/internal/domain"
 	"time"
 
@@ -13,16 +14,29 @@ type UomRepository interface {
 	FindById(id string) (*domain.Uom, error)
 	Delete(id string, deletedBy string) error
 	FindAll(req domain.UomQueryRequest) ([]domain.Uom, int64, error)
+	FindAllNoPagination() ([]domain.Uom, error)
 }
 
 type uomRepository struct {
 	db *gorm.DB
 }
 
+// FindAllNoPagination implements [UomRepository].
+func (r *uomRepository) FindAllNoPagination() ([]domain.Uom, error) {
+	var uom []domain.Uom
+	result := r.db.Where(" deleted_at is null").Find(&uom)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return uom, nil
+}
+
 // FindAll implements [UomRepository].
 func (r *uomRepository) FindAll(req domain.UomQueryRequest) ([]domain.Uom, int64, error) {
 	var uom []domain.Uom
 	var total int64
+
+	fmt.Println("req : ", req)
 
 	query := r.db.Model(&domain.Uom{}).Where("deleted_at is null")
 

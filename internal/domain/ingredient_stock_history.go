@@ -27,7 +27,15 @@ type StockOutRequest struct {
 	Notes        *string `json:"notes"`
 }
 
+type IngredientsStockHistoryRequest struct {
+	IngredientId string     `form:"ingredient_id" uri:"id"`
+	StartDate    *time.Time `form:"start_date" time_format:"2006-01-02"`
+	EndDate      *time.Time `form:"end_date" time_format:"2006-01-02"`
+}
+
 type IngredientsStockHistoryResponse struct {
+	Id            string    `json:"id"`
+	Type          string    `json:"type"`
 	Quantity      float64   `json:"quantity"`
 	PurchasePrice float64   `json:"purchase_price"`
 	Notes         *string   `json:"notes"`

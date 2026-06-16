@@ -54,6 +54,22 @@ func (h *CategoriesHandler) GetCategoriesType(c *gin.Context) {
 
 	c.JSON(http.StatusOK, SuccessResponse("Success get categorie types", data))
 }
+func (h *CategoriesHandler) GetAllCategories(c *gin.Context) {
+	tenantIdStr := c.GetString("tenantId")
+
+	var tenantId *string
+	if tenantIdStr != "" {
+		tenantId = &tenantIdStr
+	}
+
+	data, err := h.usecase.GetAllCategoriesWithoutPagination(tenantId)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, SuccessResponse("Success get categorie types", data))
+}
 
 func (h *CategoriesHandler) CreateCategories(c *gin.Context) {
 	var req domain.CategoriesRequest

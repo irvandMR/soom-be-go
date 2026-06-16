@@ -35,6 +35,15 @@ func (h *UomHandler) GetAll(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, SuccessResponse("Success get uom", data))
 }
+func (h *UomHandler) GetUomAll(c *gin.Context) {
+
+	data, err := h.usecase.GetUomAll()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse("Success get uom", data))
+}
 
 func (h *UomHandler) GetUomById(c *gin.Context) {
 	id := c.Param("id")

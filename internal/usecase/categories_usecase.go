@@ -39,6 +39,26 @@ func (u *CategoriesUsecase) GetAllCategories(req domain.CategoriesQueryRequest) 
 		Data:       categories,
 	}, nil
 }
+func (u *CategoriesUsecase) GetAllCategoriesWithoutPagination(tenantId *string) ([]domain.CategoriesResponse, error) {
+	categories, err := u.repo.FindTypeByTenant(tenantId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, middleware.ErrNotFound
+		}
+		return nil, err
+	}
+
+	var mappingResponse []domain.CategoriesResponse
+	for _, categorie := range categories {
+		mappingResponse = append(mappingResponse, domain.CategoriesResponse{
+			Id:   categorie.Id,
+			Code: categorie.Code,
+			Name: categorie.Name,
+			Type: categorie.Type,
+		})
+	}
+	return mappingResponse, err
+}
 
 func (u *CategoriesUsecase) GetCategoriesById(id string) (*domain.Categories, error) {
 	categories, err := u.repo.FindById(id)

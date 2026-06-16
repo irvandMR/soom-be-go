@@ -28,6 +28,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		uom.Use(middleware.JwtAuth())
 		{
 			uom.GET("", uomHandler.GetAll)
+			uom.GET("/all", uomHandler.GetUomAll)
 			uom.GET("/detail/:id", uomHandler.GetUomById)
 			uom.POST("", uomHandler.CreateUom)
 			uom.POST("/update", uomHandler.UpdateUom)
@@ -40,10 +41,11 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		ctg.Use(middleware.JwtAuth())
 		{
 			ctg.GET("", categoriesHandler.GetAll)
+			ctg.GET("/all", categoriesHandler.GetAllCategories)
 			ctg.GET("/:id", categoriesHandler.GetCategoriesById)
 			ctg.POST("", categoriesHandler.CreateCategories)
 			ctg.POST("/update", categoriesHandler.UpdateCategories)
-			ctg.DELETE(":id", categoriesHandler.DeleteCategories)
+			ctg.DELETE("/:id", categoriesHandler.DeleteCategories)
 			ctg.GET("/types", categoriesHandler.GetCategoriesType)
 		}
 
@@ -53,10 +55,11 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 		ing.Use(middleware.JwtAuth())
 		{
 			ing.GET("", ingredientHandle.GetAll)
+			ing.GET("/all", ingredientHandle.GetAllIngredient)
 			ing.GET("/:id", ingredientHandle.GetIngredientById)
 			ing.POST("", ingredientHandle.CreateIngredient)
 			ing.POST("/update", ingredientHandle.UpdateIngredient)
-			ing.DELETE(":id", ingredientHandle.DeleteIngredient)
+			ing.DELETE("/:id", ingredientHandle.DeleteIngredient)
 
 			ing.POST("/stock-in", ingredientHandle.StockIn)
 			ing.GET("/history/:id", ingredientHandle.GetHistory)

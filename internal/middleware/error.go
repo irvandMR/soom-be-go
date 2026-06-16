@@ -20,9 +20,10 @@ func (e *GlobalError) Error() string {
 
 // Error constants
 var (
-	ErrNotFound       = &GlobalError{Code: "NOT_FOUND", Message: "Data not found", Status: http.StatusNotFound}
-	ErrBadRequest     = &GlobalError{Code: "BAD_REQUEST", Message: "Invalid request", Status: http.StatusBadRequest}
-	ErrInternalServer = &GlobalError{Code: "INTERNAL_SERVER_ERROR", Message: "Internal server error", Status: http.StatusInternalServerError}
+	ErrNotFound            = &GlobalError{Code: "NOT_FOUND", Message: "Data not found", Status: http.StatusNotFound}
+	ErrBadRequest          = &GlobalError{Code: "BAD_REQUEST", Message: "Invalid request", Status: http.StatusBadRequest}
+	ErrInternalServer      = &GlobalError{Code: "INTERNAL_SERVER_ERROR", Message: "Internal server error", Status: http.StatusInternalServerError}
+	ErrUnprocessableEntity = &GlobalError{Code: "UNPROCESSABLE _ENTITY", Message: "", Status: http.StatusUnprocessableEntity}
 )
 
 func Errorhandler() gin.HandlerFunc {

@@ -36,11 +36,11 @@ func (u *UomUsecase) GetAll(req domain.UomQueryRequest) (*domain.PaginationRespo
 		Page:       req.Page,
 		Limit:      req.Limit,
 		TotalPages: totalPage,
-		Data:       uom,
+		Data:       u.mappingResponse(uom),
 	}, nil
 }
 
-func (u *UomUsecase) GetUomById(id string) (*domain.Uom, error) {
+func (u *UomUsecase) GetUomById(id string) (*domain.UomResponse, error) {
 	uom, err := u.repo.FindById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -48,7 +48,19 @@ func (u *UomUsecase) GetUomById(id string) (*domain.Uom, error) {
 		}
 		return nil, err
 	}
-	return uom, nil
+	result := u.mappingResponse([]domain.Uom{*uom})
+	return &result[0], nil
+}
+func (u *UomUsecase) GetUomAll() ([]domain.UomResponse, error) {
+	uoms, err := u.repo.FindAllNoPagination()
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, middleware.ErrNotFound
+		}
+		return nil, err
+	}
+	result := u.mappingResponse(uoms)
+	return result, nil
 }
 
 func (u *UomUsecase) CreateUom(req domain.UomRequest) (*domain.Uom, error) {
@@ -95,4 +107,21 @@ func (u *UomUsecase) DeleteUom(id string, deletedBy string) error {
 		return err
 	}
 	return u.repo.Delete(id, deletedBy)
+}
+
+func (u *UomUsecase) mappingResponse(uoms []domain.Uom) []domain.UomResponse {
+	result := make([]domain.UomResponse, 0, len(uoms))
+
+	for _, uom := range uoms {
+		result = append(result, domain.UomResponse{
+			Id:               uom.Id,
+			Code:             uom.Code,
+			Name:             uom.Name,
+			HaveConversion:   uom.HaveConversion,
+			BaseUnit:         uom.BaseUnit,
+			Symbol:           uom.Symbol,
+			ConversionFactor: uom.ConversionFactor,
+		})
+	}
+	return result
 }

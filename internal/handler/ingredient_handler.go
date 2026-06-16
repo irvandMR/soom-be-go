@@ -19,16 +19,42 @@ func NewIngredientHandler(db *gorm.DB) *IngredientHandler {
 	repoCategory := repository.NewCategoriesRepository(db)
 	repoUom := repository.NewUomRepository(db)
 	repoIngredientStock := repository.NewIngredientStockRepository(db)
-	uc := usecase.NewIngredientUsecase(repoIngredient, repoCategory, repoUom, repoIngredientStock)
+	uc := usecase.NewIngredientUsecase(db, repoIngredient, repoCategory, repoUom, repoIngredientStock)
 	return &IngredientHandler{usecase: uc}
 }
 
 func (h *IngredientHandler) GetAll(c *gin.Context) {
-	var req domain.PaginationRequest
+	var req domain.IngredientQueryRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("Invalid request", err.Error()))
+		return
+	}
+	tenantId := c.GetString("tenantId")
+	if tenantId != "" {
+		req.TenantId = &tenantId
+	}
 	data, err := h.usecase.GetAllIngredient(req)
 	if err != nil {
 		c.Error(err)
+		return
 	}
+	c.JSON(http.StatusOK, SuccessResponse("Success get ingredients", data))
+}
+
+func (h *IngredientHandler) GetAllIngredient(c *gin.Context) {
+	tenantIdStr := c.GetString("tenantId")
+
+	var tenantId *string
+	if tenantIdStr != "" {
+		tenantId = &tenantIdStr
+	}
+
+	data, err := h.usecase.GetAllIngredientWithoutPaginaton(tenantId)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
 	c.JSON(http.StatusOK, SuccessResponse("Success get ingredients", data))
 }
 
@@ -37,8 +63,9 @@ func (h *IngredientHandler) GetIngredientById(c *gin.Context) {
 	data, err := h.usecase.GetIngredientById(id)
 	if err != nil {
 		c.Error(err)
+		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse("Success get ingredients", data))
+	c.JSON(http.StatusOK, SuccessResponse("Success get ingredient", data))
 }
 
 func (h *IngredientHandler) CreateIngredient(c *gin.Context) {
@@ -87,7 +114,7 @@ func (h *IngredientHandler) DeleteIngredient(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, SuccessResponse("Success delete categories", nil))
+	c.JSON(http.StatusOK, SuccessResponse("Success delete ingredient", nil))
 }
 
 func (h *IngredientHandler) StockIn(c *gin.Context) {
@@ -107,10 +134,19 @@ func (h *IngredientHandler) StockIn(c *gin.Context) {
 }
 
 func (h *IngredientHandler) GetHistory(c *gin.Context) {
-	id := c.Param("id")
-	data, err := h.usecase.GetHistory(id)
+	var req domain.IngredientsStockHistoryRequest
+	if err := c.ShouldBindUri(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("Invalid route parameter", err.Error()))
+		return
+	}
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("Invalid query parameter", err.Error()))
+		return
+	}
+	data, err := h.usecase.GetHistory(req)
 	if err != nil {
 		c.Error(err)
+		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse("Success get ingredients history", data))
+	c.JSON(http.StatusOK, SuccessResponse("Success get ingredient history", data))
 }

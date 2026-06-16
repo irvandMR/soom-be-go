@@ -27,7 +27,7 @@ func (r *categoriesRepository) FindTypeByTenant(tenantId *string) ([]domain.Cate
 	query := r.db.Model(&domain.Categories{})
 
 	if tenantId != nil {
-		query = query.Where("tenant_id = ?", *tenantId)
+		query = query.Where("tenant_id = ? and deleted_at is null", *tenantId)
 	}
 
 	err := query.Find(&categories).Error
