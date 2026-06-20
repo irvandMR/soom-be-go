@@ -154,6 +154,7 @@ func generateToken(user *domain.User, duration time.Duration) (string, error) {
 		"id":       user.Id,
 		"username": user.Username,
 		"role":     user.Role,
+		"tenantId": user.TenantId,
 		"exp":      time.Now().Add(duration).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

@@ -5,6 +5,6 @@ import "time"
 type RefreshToken struct {
 	BaseModel
 	UserId    string    `gorm:"type:uuid"`
-	Token     string    `gorm:"size:255;not null"`
+	Token     string    `gorm:"type:text"`
 	ExpiresAt time.Time `gorm:"not null"`
 }

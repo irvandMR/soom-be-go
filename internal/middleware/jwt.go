@@ -60,7 +60,7 @@ func JwtAuth() gin.HandlerFunc {
 		c.Set("userId", claims["id"])
 		c.Set("username", claims["username"])
 		c.Set("role", claims["role"])
-
+		c.Set("tenantId", claims["tenantId"])
 		c.Next()
 	}
 }

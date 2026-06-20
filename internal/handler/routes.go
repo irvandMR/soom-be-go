@@ -64,6 +64,19 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 			ing.POST("/stock-in", ingredientHandle.StockIn)
 			ing.GET("/history/:id", ingredientHandle.GetHistory)
 		}
+
+		// Product
+		productHandle := NewProductHandler(db)
+		product := v1.Group("/product")
+		product.Use(middleware.JwtAuth())
+		{
+			product.GET("", productHandle.GetAll)
+			product.POST("", productHandle.CreatedProduct)
+			product.GET("/:id", productHandle.GetProductById)
+			product.POST("/update", productHandle.UpdateProduct)
+			product.DELETE("/:id", productHandle.DeleteProduct)
+
+		}
 	}
 
 }
