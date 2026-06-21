@@ -19,17 +19,20 @@ func main() {
 	config.RunMigrations(sqlDB)
 	config.InitRedis()
 
-	port := os.Getenv("APP_PORT")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://localhost:5174"},
-        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "X-Tenant-ID"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-    }))
+		AllowOrigins:     []string{"http://localhost:5174"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "X-Tenant-ID"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	r.Use(middleware.Errorhandler())
 
