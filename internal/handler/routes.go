@@ -8,7 +8,7 @@ import (
 )
 
 func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
-	router.GET("/health", HealthHandler)
+	router.GET("/health", HealthHandler(db))
 
 	v1 := router.Group("/api/v1")
 	{
