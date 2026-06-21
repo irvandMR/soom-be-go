@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"soom-be-go/internal/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -36,6 +37,22 @@ func JwtAuth() gin.HandlerFunc {
 		}
 
 		tokenString := parts[1]
+
+		// cek apakah token ada di blacklist (Redis)
+		ctx := c.Request.Context()
+		if config.RedisClient != nil {
+			err := config.RedisClient.Get(ctx, "blacklist:"+tokenString).Err()
+			if err == nil {
+				// token ditemukan di blacklist (sudah dilogout)
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"status":  "error",
+					"code":    "UNAUTHORIZED",
+					"message": "Token has been invalidated",
+				})
+				c.Abort()
+				return
+			}
+		}
 
 		// validasi token
 		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {

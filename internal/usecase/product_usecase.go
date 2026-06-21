@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"soom-be-go/internal/domain"
 	"soom-be-go/internal/middleware"
 	"soom-be-go/internal/repository"
@@ -14,10 +15,11 @@ type ProductUsecase struct {
 	repo         repository.ProductRepository
 	repoCategory repository.CategoriesRepository
 	repoUom      repository.UomRepository
+	repoTenant   repository.TenantRepository
 }
 
-func NewProductUsecase(repoProduct repository.ProductRepository, repoCategory repository.CategoriesRepository, repoUom repository.UomRepository) *ProductUsecase {
-	return &ProductUsecase{repo: repoProduct, repoCategory: repoCategory, repoUom: repoUom}
+func NewProductUsecase(repoProduct repository.ProductRepository, repoCategory repository.CategoriesRepository, repoUom repository.UomRepository, repoTenant repository.TenantRepository) *ProductUsecase {
+	return &ProductUsecase{repo: repoProduct, repoCategory: repoCategory, repoUom: repoUom, repoTenant: repoTenant}
 }
 
 func (p *ProductUsecase) DeleteProduct(id string, deletedby string) error {
@@ -105,6 +107,13 @@ func (p *ProductUsecase) CreateProduct(req domain.ProductRequest) (*domain.Produ
 		return nil, err
 	}
 
+	code, err := p.repoTenant.FindCodeTenantById(*req.TenantId)
+	if err != nil {
+		return nil, err
+	}
+
+	productCode := fmt.Sprintf("%s-%s", code, req.Code)
+
 	product := &domain.Product{
 		BaseModelWithDeleted: domain.BaseModelWithDeleted{
 			BaseModel: domain.BaseModel{
@@ -114,7 +123,7 @@ func (p *ProductUsecase) CreateProduct(req domain.ProductRequest) (*domain.Produ
 		},
 		CategoryID: category.Id,
 		UnitID:     uom.Id,
-		Code:       req.Code,
+		Code:       productCode,
 		Name:       req.Name,
 		Type:       req.Type,
 		TenantID:   req.TenantId,
@@ -122,6 +131,9 @@ func (p *ProductUsecase) CreateProduct(req domain.ProductRequest) (*domain.Produ
 	}
 
 	err = p.repo.Create(product)
+
+	product.Category = *category
+	product.Unit = *uom
 
 	response := p.mapppingSingleResponse(*product)
 	return &response, err
@@ -173,7 +185,9 @@ func (u *ProductUsecase) mapppingSingleResponse(product domain.Product) domain.P
 		Id:           product.Id,
 		Code:         product.Code,
 		Name:         product.Name,
+		CategoryID:   product.Category.Id,
 		CategoryName: product.Category.Name,
+		UnitID:       product.Unit.Id,
 		UnitSymbol:   product.Unit.Symbol,
 		Type:         product.Type,
 		TargetMargin: product.TargetMargin,

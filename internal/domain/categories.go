@@ -33,6 +33,7 @@ type CategoriesResponse struct {
 
 type CategoriesQueryRequest struct {
 	PaginationRequest
-	Search string `form:"search"`
-	Type   string `from:"type"`
+	Search   string  `form:"search"`
+	Type     string  `from:"type"`
+	TenantId *string `form:"-"`
 }

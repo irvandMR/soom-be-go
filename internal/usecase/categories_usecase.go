@@ -51,10 +51,11 @@ func (u *CategoriesUsecase) GetAllCategoriesWithoutPagination(tenantId *string) 
 	var mappingResponse []domain.CategoriesResponse
 	for _, categorie := range categories {
 		mappingResponse = append(mappingResponse, domain.CategoriesResponse{
-			Id:   categorie.Id,
-			Code: categorie.Code,
-			Name: categorie.Name,
-			Type: categorie.Type,
+			Id:       categorie.Id,
+			Code:     categorie.Code,
+			Name:     categorie.Name,
+			Type:     categorie.Type,
+			IsActive: categorie.IsActive,
 		})
 	}
 	return mappingResponse, err

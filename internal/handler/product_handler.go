@@ -18,7 +18,8 @@ func NewProductHandler(db *gorm.DB) *ProductHandler {
 	repoProduct := repository.NewProductRepository(db)
 	repoCategory := repository.NewCategoriesRepository(db)
 	repoUom := repository.NewUomRepository(db)
-	uc := usecase.NewProductUsecase(repoProduct, repoCategory, repoUom)
+	repoTenant := repository.NewTenantRepository(db)
+	uc := usecase.NewProductUsecase(repoProduct, repoCategory, repoUom, repoTenant)
 	return &ProductHandler{
 		usecase: uc,
 	}

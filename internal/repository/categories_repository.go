@@ -45,6 +45,10 @@ func (r *categoriesRepository) FindAll(req domain.CategoriesQueryRequest) ([]dom
 
 	query := r.db.Model(&domain.Categories{}).Where("deleted_at is null")
 
+	if req.TenantId != nil {
+		query = query.Where("tenant_id = ?", *req.TenantId)
+	}
+
 	if req.Search != "" {
 		query = query.Where("name ILIKE ?", "%"+req.Search+"%")
 	}
