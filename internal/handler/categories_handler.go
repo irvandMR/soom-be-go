@@ -22,6 +22,14 @@ func NewCategoriesHandler(db *gorm.DB) *CategoriesHandler {
 
 func (h *CategoriesHandler) GetAll(c *gin.Context) {
 	var req domain.CategoriesQueryRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("Invalid request", err.Error()))
+		return
+	}
+	tenantId := c.GetString("tenantId")
+	if tenantId != "" {
+		req.TenantId = &tenantId
+	}
 	data, err := h.usecase.GetAllCategories(req)
 	if err != nil {
 		c.Error(err)

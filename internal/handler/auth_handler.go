@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 	"soom-be-go/internal/domain"
 	"soom-be-go/internal/repository"
 	"soom-be-go/internal/usecase"
@@ -67,7 +68,17 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, ErrorResponse("Invalid request", handleValidationError(err)))
 		return
 	}
-	if err := h.usecase.Logout(req.RefreshToken); err != nil {
+
+	authHeader := c.GetHeader("Authorization")
+	accessToken := ""
+	if authHeader != "" {
+		parts := strings.Split(authHeader, " ")
+		if len(parts) == 2 && parts[0] == "Bearer" {
+			accessToken = parts[1]
+		}
+	}
+
+	if err := h.usecase.Logout(accessToken, req.RefreshToken); err != nil {
 		c.Error(err)
 		return
 	}

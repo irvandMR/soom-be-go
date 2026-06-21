@@ -17,6 +17,7 @@ func main() {
 	_ = db
 
 	config.RunMigrations(sqlDB)
+	config.InitRedis()
 
 	port := os.Getenv("APP_PORT")
 

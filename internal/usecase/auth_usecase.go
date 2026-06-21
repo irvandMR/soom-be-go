@@ -1,8 +1,10 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"os"
+	"soom-be-go/internal/config"
 	"soom-be-go/internal/domain"
 	"soom-be-go/internal/middleware"
 	"soom-be-go/internal/repository"
@@ -145,8 +147,35 @@ func (u *AuthUsecase) RefreshToken(req domain.RefreshTokenRequest) (*domain.Logi
 	}, nil
 }
 
-func (u *AuthUsecase) Logout(refreshToken string) error {
-	return u.repo.DeleteRefreshToken(refreshToken)
+func (u *AuthUsecase) Logout(accessToken string, refreshToken string) error {
+	// Delete refresh token from DB
+	err := u.repo.DeleteRefreshToken(refreshToken)
+	if err != nil {
+		return err
+	}
+
+	// Calculate remaining TTL for the access token
+	token, _ := jwt.Parse(accessToken, func(t *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+
+	if token != nil {
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			if exp, ok := claims["exp"].(float64); ok {
+				expTime := time.Unix(int64(exp), 0)
+				duration := time.Until(expTime)
+				if duration > 0 && config.RedisClient != nil {
+					// Save token to Redis blacklist with TTL
+					err = config.RedisClient.Set(context.Background(), "blacklist:"+accessToken, "revoked", duration).Err()
+					if err != nil {
+						// Log error but don't fail logout
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func generateToken(user *domain.User, duration time.Duration) (string, error) {
