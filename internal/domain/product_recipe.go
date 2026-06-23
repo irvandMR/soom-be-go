@@ -8,14 +8,20 @@ type ProductRecipes struct {
 	EstimatedYield *float64 `gorm:"column:estimated_yield;type:numeric"`
 	UnitId         *string  `gorm:"column:unit_id;type:uuid"`
 	IsActive       bool     `gorm:"column:is_active;not null;default:false"`
+	TotalCost      float64  `gorm:"column:total_cost;type:numeric;not null;default:0"`
+	CostPerUnit    float64  `gorm:"column:cost_per_unit;type:numeric;not null;default:0"`
 
 	Product Product `gorm:"foreignKey:ProductId"`
 }
 
 type ProductRecipesRequest struct {
+	ProductId      string                     `json:"product_id" binding:"required"`
 	EstimatedYield float64                    `json:"estimated_yield" binding:"required,gt=0"`
 	Notes          *string                    `json:"notes"`
 	Items          []ProductRecipeItemRequest `json:"items" binding:"required,min=1,dive"`
+	Username       string                     `json:"-"`
+	TenantId       string                     `json:"-"`
+	UnitId         string                     `json:"unit_id" binding:"required,uuid"`
 }
 
 type RecipeResponse struct {

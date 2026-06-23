@@ -19,7 +19,10 @@ func NewProductHandler(db *gorm.DB) *ProductHandler {
 	repoCategory := repository.NewCategoriesRepository(db)
 	repoUom := repository.NewUomRepository(db)
 	repoTenant := repository.NewTenantRepository(db)
-	uc := usecase.NewProductUsecase(repoProduct, repoCategory, repoUom, repoTenant)
+	repoRecipe := repository.NewProductRecipeRepository(db)
+	repoIngredient := repository.NewIngredientRepository(db)
+	repoItem := repository.NewProductRecipeItemRepository(db)
+	uc := usecase.NewProductUsecase(repoProduct, repoCategory, repoUom, repoTenant, repoRecipe, repoIngredient, repoItem)
 	return &ProductHandler{
 		usecase: uc,
 	}
@@ -103,4 +106,21 @@ func (p *ProductHandler) DeleteProduct(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, SuccessResponse("Success Delete product", nil))
+}
+
+func (p *ProductHandler) CreatedProductRecipe(c *gin.Context) {
+	var req domain.ProductRecipesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ErrorResponse("Invalid request", handleValidationError(err)))
+		return
+	}
+	req.Username = c.GetString("username")
+	req.TenantId = c.GetString("tenantId")
+	data, err := p.usecase.SaveProductRecipe(req)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse("Success create products", data))
+
 }

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"soom-be-go/internal/domain"
 	"soom-be-go/internal/middleware"
 	"soom-be-go/internal/repository"
@@ -11,11 +12,12 @@ import (
 )
 
 type CategoriesUsecase struct {
-	repo repository.CategoriesRepository
+	repo       repository.CategoriesRepository
+	repoTenant repository.TenantRepository
 }
 
-func NewCategoriesUsecase(r repository.CategoriesRepository) *CategoriesUsecase {
-	return &CategoriesUsecase{repo: r}
+func NewCategoriesUsecase(r repository.CategoriesRepository, repoTenant repository.TenantRepository) *CategoriesUsecase {
+	return &CategoriesUsecase{repo: r, repoTenant: repoTenant}
 }
 
 func (u *CategoriesUsecase) GetAllCategories(req domain.CategoriesQueryRequest) (*domain.PaginationResponse, error) {
@@ -84,6 +86,11 @@ func (u *CategoriesUsecase) GetCategoriesByType(tenantId *string) ([]domain.Cate
 }
 
 func (u *CategoriesUsecase) CreateCategories(req domain.CategoriesRequest) (*domain.Categories, error) {
+	code, err := u.repoTenant.FindCodeTenantById(*req.TenantId)
+	if err != nil {
+		return nil, err
+	}
+	productCode := fmt.Sprintf("%s-%s", code, req.Code)
 	categories := &domain.Categories{
 		BaseModelWithDeleted: domain.BaseModelWithDeleted{
 			BaseModel: domain.BaseModel{
@@ -92,12 +99,12 @@ func (u *CategoriesUsecase) CreateCategories(req domain.CategoriesRequest) (*dom
 			},
 		},
 		TenantId: req.TenantId,
-		Code:     req.Code,
+		Code:     productCode,
 		Name:     req.Name,
 		IsActive: req.IsActive,
 		Type:     req.Type,
 	}
-	err := u.repo.Create(categories)
+	err = u.repo.Create(categories)
 	return categories, err
 }
 

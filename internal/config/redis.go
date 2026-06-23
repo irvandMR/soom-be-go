@@ -26,15 +26,16 @@ func InitRedis() {
 	client := redis.NewClient(&redis.Options{
 		Addr:      fmt.Sprintf("%s:%s", host, port),
 		Password:  password,
+		DB:        0,
 		TLSConfig: &tls.Config{},
 	})
 
 	// Test connection
 	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
-		log.Fatalf("Failed to connect to Redis: %v", err)
+		log.Println("Redis connection failed:", err)
+		return // jangan crash
 	}
-
 	RedisClient = client
 	log.Println("Connected to Redis successfully")
 }
