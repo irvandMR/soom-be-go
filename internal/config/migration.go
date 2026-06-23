@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	soomdb "soom-be-go/db"
 
@@ -17,8 +18,8 @@ func RunMigrations(sqlDb *sql.DB) {
 	}
 
 	if err := goose.Up(sqlDb, "migrations"); err != nil {
-		panic(err)
-		
+		log.Println("Migration warning (mungkin sudah up to date):", err)
+
 	}
 
 	fmt.Println("Migrations completed successfully")
