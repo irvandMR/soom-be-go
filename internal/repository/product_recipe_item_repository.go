@@ -8,10 +8,31 @@ import (
 
 type ProductRecipeItemRepository interface {
 	FindByRecipeId(recipeId string) ([]domain.ProductRecipeItem, error)
+	CreateWithItems(recipe *domain.ProductRecipes, items []domain.ProductRecipeItem) error
 }
 
 type productRecipeItemRepository struct {
 	db *gorm.DB
+}
+
+// CreateWithItems implements [ProductRecipeItemRepository].
+func (p *productRecipeItemRepository) CreateWithItems(recipe *domain.ProductRecipes, items []domain.ProductRecipeItem) error {
+	return p.db.Transaction(func(tx *gorm.DB) error {
+		// 1. Create recipe
+		if err := tx.Create(recipe).Error; err != nil {
+			return err
+		}
+
+		// 2. Insert all items
+		for i := range items {
+			items[i].RecipeId = recipe.Id
+			if err := tx.Create(&items[i]).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 // FindByRecipeId implements [ProductRecipeItemRepository].

@@ -16,7 +16,8 @@ type CategoriesHandler struct {
 
 func NewCategoriesHandler(db *gorm.DB) *CategoriesHandler {
 	repo := repository.NewCategoriesRepository(db)
-	uc := usecase.NewCategoriesUsecase(repo)
+	repotenat := repository.NewTenantRepository(db)
+	uc := usecase.NewCategoriesUsecase(repo, repotenat)
 	return &CategoriesHandler{usecase: uc}
 }
 

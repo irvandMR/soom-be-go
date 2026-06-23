@@ -77,6 +77,7 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 			product.DELETE("/:id", productHandle.DeleteProduct)
 
 			// Recipe
+			product.POST("/recipe", productHandle.CreatedProductRecipe)
 
 		}
 	}

@@ -1,23 +1,6 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:14-alpine
-    container_name: soom_go_db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: soom_go_be
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -28,31 +11,16 @@ services:
     volumes:
       - redis_data:/data
 
-  # Uncomment the 'api' service below jika kamu ingin menjalankan 
-  # aplikasi Go di dalam Docker juga untuk testing/deployment.
-  # Secara default, kamu tetap bisa menjalankan Go secara lokal dengan 'air'
-  # dan hanya menjalankan database melalui Docker (docker compose up -d db)
-  #
-  # api:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: soom_go_api
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     - DB_HOST=db
-  #     - DB_USER=postgres
-  #     - DB_PASS=postgres
-  #     - DB_NAME=soom_go_be
-  #     - DB_PORT=5432
-  #     - APP_PORT=8080
-  #     - JWT_SECRET=your_jwt_secret_key
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soom_go_api
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
 
 volumes:
-  postgres_data:
   redis_data:
