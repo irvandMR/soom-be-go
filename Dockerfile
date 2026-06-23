@@ -1,19 +1,31 @@
+# Stage 1: Build biner Go menggunakan image golang resmi
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+# Copy modul dan download dependency dulu (memanfaatkan cache layer Docker)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy seluruh source code proyek
+COPY . .
+
+# Build biner untuk arsitektur Linux
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app-binary cmd/api/main.go
+
+# Stage 2: Gunakan alpine kecil untuk menjalankan aplikasinya saja
 FROM alpine:latest
 
 WORKDIR /app
 
-# Install tzdata agar tidak ada kendala format waktu atau timezone di aplikasi Go
 RUN apk --no-cache add tzdata
 
+# Ambil biner hasil compile dari Stage 1 tadi
+COPY --from=builder /app/app-binary /app/api
 COPY .env /app/.env
-
-# Salin file binary matang (app-binary) yang sudah kamu build di lokal tadi
-COPY app-binary /app/api
 
 RUN chmod +x /app/api
 
-# Buka port sesuai dengan yang digunakan aplikasi Go kamu
 EXPOSE 8080
 
-# Jalankan file binary-nya saat container dinyalakan
 CMD ["/app/api"]
