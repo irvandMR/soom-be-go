@@ -5,6 +5,8 @@ WORKDIR /app
 # Install tzdata agar tidak ada kendala format waktu atau timezone di aplikasi Go
 RUN apk --no-cache add tzdata
 
+COPY .env /app/.env
+
 # Salin file binary matang (app-binary) yang sudah kamu build di lokal tadi
 COPY app-binary /app/api
 
