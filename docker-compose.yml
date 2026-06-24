@@ -28,7 +28,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    - /opt/install/soom-fe-go/dist:/usr/share/nginx/html:ro
     depends_on:
       - api
 
