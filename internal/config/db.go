@@ -11,7 +11,7 @@ import (
 
 func InitDB() (*gorm.DB, *sql.DB) {
 	dsn := os.Getenv("DB_URL")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{PrepareStmt: false})
 	if err != nil {
 		panic("Failed to connect to the database")
 	}
