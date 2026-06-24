@@ -27,9 +27,12 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-    - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    - /opt/install/soom-fe-go/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/install/soom-fe-go/dist:/usr/share/nginx/html:ro
+      # Mount folder sertifikat (sesuaikan path dengan punya Anda)
+      - /etc/letsencrypt/:/etc/letsencrypt/:ro
     depends_on:
       - api
 
