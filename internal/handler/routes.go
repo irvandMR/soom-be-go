@@ -8,10 +8,11 @@ import (
 )
 
 func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
-	router.GET("/health", HealthHandler(db))
 
 	v1 := router.Group("/api/v1")
 	{
+
+		v1.GET("/health", HealthHandler(db))
 		// AUTH
 		authHandler := NewAuthHandler(db)
 		auth := v1.Group("/auth")
