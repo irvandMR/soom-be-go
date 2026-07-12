@@ -79,7 +79,8 @@ func RegisterRoutes(router *gin.Engine, db *gorm.DB) {
 
 			// Recipe
 			product.POST("/recipe", productHandle.CreatedProductRecipe)
-
+			product.GET("/recipe/:id", productHandle.GetProductRecipes)
+			product.POST("/recipe/:productId/:recipeId/active", productHandle.SetActiveRecipe)
 		}
 	}
 

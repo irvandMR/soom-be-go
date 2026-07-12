@@ -121,6 +121,26 @@ func (p *ProductHandler) CreatedProductRecipe(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	c.JSON(http.StatusOK, SuccessResponse("Success create products", data))
+	c.JSON(http.StatusOK, SuccessResponse("Success save products recipes", data))
 
+}
+
+func (p *ProductHandler) GetProductRecipes(c *gin.Context) {
+	productId := c.Param("id")
+	data, err := p.usecase.GetProductRecipes(productId)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse("Success get products recipes", data))
+}
+
+func (p *ProductHandler) SetActiveRecipe(c *gin.Context) {
+	productId := c.Param("productId")
+	recipeId := c.Param("recipeId")
+	if err := p.usecase.SetActiveRecipe(productId, recipeId); err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, SuccessResponse("Success set active recipe", nil))
 }
