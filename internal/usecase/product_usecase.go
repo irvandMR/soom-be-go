@@ -291,6 +291,110 @@ func (p *ProductUsecase) SaveProductRecipe(req domain.ProductRecipesRequest) (*d
 	return &response, nil
 }
 
+func (u *ProductUsecase) GetProductRecipes(productId string) ([]domain.RecipeResponse, error) {
+	product, err := u.repo.FindById(productId)
+	if err != nil {
+		return nil, err
+	}
+
+	recipes, err := u.repoRecipe.FindByProductId(product.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	var responses []domain.RecipeResponse
+	for _, recipe := range recipes {
+		items, err := u.repoItem.FindByRecipeId(recipe.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		var yieldUnit domain.Uom
+		if recipe.UnitId != nil {
+			uom, err := u.validateUom(*recipe.UnitId)
+			if err == nil && uom != nil {
+				yieldUnit = *uom
+			}
+		}
+
+		var itemsWithDetail []recipeItemWithDetail
+		for _, item := range items {
+			ingredient, err := u.validationIngredient(item.IngredientId)
+			if err != nil {
+				return nil, err
+			}
+
+			var unit domain.Uom
+			if item.UnitId != nil {
+				uom, err := u.validateUom(*item.UnitId)
+				if err == nil && uom != nil {
+					unit = *uom
+				}
+			}
+
+			itemsWithDetail = append(itemsWithDetail, recipeItemWithDetail{
+				Item:       item,
+				Ingredient: *ingredient,
+				Unit:       unit,
+			})
+		}
+
+		responses = append(responses, u.mappingRecipeResponse(recipe, itemsWithDetail, yieldUnit))
+	}
+
+	if responses == nil {
+		responses = make([]domain.RecipeResponse, 0)
+	}
+
+	return responses, nil
+}
+
+func (u *ProductUsecase) SetActiveRecipe(productId string, recipeId string) error {
+	product, err := u.repo.FindById(productId)
+	if err != nil {
+		return err
+	}
+
+	recipes, err := u.repoRecipe.FindByProductId(product.Id)
+	if err != nil {
+		return err
+	}
+
+	var recipeFound bool
+	var activeRecipeCost float64
+
+	for i := range recipes {
+		if recipes[i].Id == recipeId {
+			recipeFound = true
+			activeRecipeCost = recipes[i].TotalCost
+			if !recipes[i].IsActive {
+				recipes[i].IsActive = true
+				if err := u.repoRecipe.Update(&recipes[i]); err != nil {
+					return err
+				}
+			}
+		} else {
+			if recipes[i].IsActive {
+				recipes[i].IsActive = false
+				if err := u.repoRecipe.Update(&recipes[i]); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	if !recipeFound {
+		return errors.New("recipe not found for this product")
+	}
+
+	product.EstimatedCost = &activeRecipeCost
+	if err := u.repo.Update(product); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *ProductUsecase) validateUom(unitId string) (*domain.Uom, error) {
 	uom, err := u.repoUom.FindById(unitId)
 	if err != nil {
