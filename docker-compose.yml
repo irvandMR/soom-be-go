@@ -1,18 +1,10 @@
 services:
-  redis:
-    image: redis:7-alpine
-    container_name: soom_go_redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
-  api:
+  soom_be_service:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: soom_go_api
+    image: soom_be_service:latest
     restart: always
     ports:
       - "127.0.0.1:8080:8080"
@@ -20,6 +12,9 @@ services:
       - .env
     volumes:
       - .env:/app/.env
+    networks:
+      - shared_net
 
-volumes:
-  redis_data:
+networks:
+  shared_net:
+    external: true
